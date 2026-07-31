@@ -3,24 +3,32 @@ function updateTime() {
     const now = new Date();
     document.getElementById('time').textContent = now.toLocaleTimeString();
     document.getElementById('date').textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
+}
+
+function updateGreeting() {
+    const now = new Date();
     const hrs = now.getHours();
     let greet = "Good Morning";
     if (hrs >= 12 && hrs < 17) greet = "Good Afternoon";
     else if (hrs >= 17) greet = "Good Evening";
     
-    const name = localStorage.getItem('userName') || 'User';
-    document.getElementById('greeting').innerHTML = `${greet}, ${name}!`;
-    
-    const userNameEl = document.getElementById('user-name');
-    if (userNameEl) {
-        userNameEl.addEventListener('blur', (e) => {
-            localStorage.setItem('userName', e.target.textContent);
-        });
+    const name = localStorage.getItem('userName') || 'Pengguna';
+    const greetingEl = document.getElementById('greeting');
+    if (greetingEl) {
+        greetingEl.innerHTML = `${greet}, ${name}!`;
     }
 }
+
+// Jalankan jam setiap 1 detik
 setInterval(updateTime, 1000);
 updateTime();
+
+// Jalankan greeting 1 kali saja di awal
+updateGreeting();
+
+setInterval(updateTime, 1000);
+updateTime();
+initGreeting();
 
 // Theme Toggle
 const themeBtn = document.getElementById('theme-toggle');
@@ -86,10 +94,10 @@ function saveAndRenderTodos() {
         const li = document.createElement('li');
         if (todo.completed) li.classList.add('completed');
         
-        li.innerHTML = `
-            ${todo.text}
-            Delete
-        `;
+       li.innerHTML = `
+    <span>${todo.text}</span>
+    <button onclick="deleteTodo(${index})">Delete</button>
+`;
         todoList.appendChild(li);
     });
 }
