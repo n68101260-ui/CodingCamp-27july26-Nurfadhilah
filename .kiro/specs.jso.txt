@@ -1,0 +1,6 @@
+{
+  "project": "To-Do List Life Dashboard",
+  "builder_id": "n68101260@gmail.com",
+  "tool": "Kiro CLI / Web",
+  "status": "completed"
+}
