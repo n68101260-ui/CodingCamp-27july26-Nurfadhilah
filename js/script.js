@@ -1,55 +1,57 @@
-// Time & Greeting
-function updateTime() {
+// ==========================================
+// 1. Time & Greeting (Bebas Kedip / Flicker)
+// ==========================================
+function updateTimeAndGreeting() {
     const now = new Date();
+    
+    // Update Jam & Tanggal
     const timeEl = document.getElementById('time');
     const dateEl = document.getElementById('date');
     
     if (timeEl) timeEl.textContent = now.toLocaleTimeString();
-    if (dateEl) dateEl.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
-    // Perbarui juga sapaan jika pergantian jam terjadi (tanpa merusak DOM nama)
-    updateGreetingTextOnly();
-}
+    if (dateEl) dateEl.textContent = now.toLocaleDateString(undefined, { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
 
-function initGreeting() {
-    const name = localStorage.getItem('userName') || 'User';
+    // Update Teks Sapaan (Tanpa merusak elemen nama di HTML)
+    const hrs = now.getHours();
+    let greetText = "Good Morning";
+    if (hrs >= 12 && hrs < 17) greetText = "Good Afternoon";
+    else if (hrs >= 17) greetText = "Good Evening";
+
+    // Ambil node teks pertama di dalam #greeting untuk diubah saja
     const greetingEl = document.getElementById('greeting');
-    
-    if (greetingEl) {
-        // Set struktur HTML sekali saja di awal
-        greetingEl.innerHTML = `<span id="greet-text">Good Morning</span>, <span id="user-name" contenteditable="true">${name}</span>!`;
-        
-        // Listener simpan nama (cukup dipasang 1x saja)
-        const userNameEl = document.getElementById('user-name');
-        if (userNameEl) {
-            userNameEl.addEventListener('blur', (e) => {
-                localStorage.setItem('userName', e.target.textContent);
-            });
+    if (greetingEl && greetingEl.firstChild) {
+        if (greetingEl.firstChild.nodeType === Node.TEXT_NODE) {
+            greetingEl.firstChild.nodeValue = `${greetText}, `;
         }
     }
-    updateGreetingTextOnly();
 }
 
-function updateGreetingTextOnly() {
-    const hrs = new Date().getHours();
-    let greet = "Selamat Pagi";
-    if (hrs >= 12 && hrs < 15) greet = "Selamat Siang";
-    else if (hrs >= 15 && hrs < 18) greet = "Selamat Sore";
-    else if (hrs >= 18 || hrs < 4) greet = "Selamat Malam";
+function initGreetingName() {
+    const name = localStorage.getItem('userName') || 'User';
+    const userNameEl = document.getElementById('user-name');
     
-    const greetTextEl = document.getElementById('greet-text');
-    // Hanya ubah teksnya saja, JANGAN overwrite innerHTML!
-    if (greetTextEl && greetTextEl.textContent !== greet) {
-        greetTextEl.textContent = greet;
+    if (userNameEl) {
+        userNameEl.textContent = name;
+        
+        // Simpan nama ke localStorage saat selesai edit (blur)
+        userNameEl.addEventListener('blur', (e) => {
+            const newName = e.target.textContent.trim() || 'User';
+            localStorage.setItem('userName', newName);
+        });
     }
 }
 
-// Jalankan saat pertama kali & set interval jam
-initGreeting();
-updateTime();
-setInterval(updateTime, 1000);
+// Inisialisasi awal jam & sapaan
+initGreetingName();
+updateTimeAndGreeting();
+setInterval(updateTimeAndGreeting, 1000); // Jalan tiap detik tanpa flick!
 
-// Theme Toggle (Dark Mode)
+
+// ==========================================
+// 2. Theme Toggle (Dark Mode)
+// ==========================================
 const themeBtn = document.getElementById('theme-toggle');
 if (themeBtn) {
     themeBtn.addEventListener('click', () => {
@@ -59,7 +61,10 @@ if (themeBtn) {
     });
 }
 
-// Focus Timer
+
+// ==========================================
+// 3. Focus Timer
+// ==========================================
 let timer;
 let timeLeft = 25 * 60;
 const timerDisplay = document.getElementById('timer-display');
@@ -98,7 +103,10 @@ if (resetBtn) {
     });
 }
 
-// To-Do List (Termasuk Tombol Delete)
+
+// ==========================================
+// 4. To-Do List
+// ==========================================
 const todoForm = document.getElementById('todo-form');
 const todoInput = document.getElementById('todo-input');
 const todoList = document.getElementById('todo-list');
@@ -109,11 +117,11 @@ function saveAndRenderTodos() {
     localStorage.setItem('todos', JSON.stringify(todos));
     if (!todoList) return;
     todoList.innerHTML = '';
+    
     todos.forEach((todo, index) => {
         const li = document.createElement('li');
         if (todo.completed) li.classList.add('completed');
         
-        // TOMBOL DELETE DIPASANG DI SINI:
         li.innerHTML = `
             <span onclick="toggleTodo(${index})" style="cursor:pointer;">${todo.text}</span>
             <button onclick="deleteTodo(${index})">Delete</button>
@@ -153,7 +161,10 @@ window.deleteTodo = (index) => {
 
 saveAndRenderTodos();
 
-// Quick Links
+
+// ==========================================
+// 5. Quick Links
+// ==========================================
 const linkForm = document.getElementById('link-form');
 const linksContainer = document.getElementById('links-container');
 let links = JSON.parse(localStorage.getItem('quickLinks')) || [];
@@ -162,6 +173,7 @@ function saveAndRenderLinks() {
     localStorage.setItem('quickLinks', JSON.stringify(links));
     if (!linksContainer) return;
     linksContainer.innerHTML = '';
+    
     links.forEach(l => {
         const a = document.createElement('a');
         a.href = l.url;
@@ -174,12 +186,15 @@ function saveAndRenderLinks() {
 if (linkForm) {
     linkForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = document.getElementById('link-name').value;
-        const url = document.getElementById('link-url').value;
-        links.push({ name, url });
-        document.getElementById('link-name').value = '';
-        document.getElementById('link-url').value = '';
-        saveAndRenderLinks();
+        const nameInput = document.getElementById('link-name');
+        const urlInput = document.getElementById('link-url');
+        
+        if (nameInput && urlInput) {
+            links.push({ name: nameInput.value, url: urlInput.value });
+            nameInput.value = '';
+            urlInput.value = '';
+            saveAndRenderLinks();
+        }
     });
 }
 
