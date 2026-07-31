@@ -6,21 +6,20 @@ function updateTime() {
     
     if (timeEl) timeEl.textContent = now.toLocaleTimeString();
     if (dateEl) dateEl.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    // Perbarui juga sapaan jika pergantian jam terjadi (tanpa merusak DOM nama)
+    updateGreetingTextOnly();
 }
 
-function updateGreeting() {
-    const now = new Date();
-    const hrs = now.getHours();
-    let greet = "Good Morning";
-    if (hrs >= 12 && hrs < 17) greet = "Good Afternoon";
-    else if (hrs >= 17) greet = "Good Evening";
-    
+function initGreeting() {
     const name = localStorage.getItem('userName') || 'User';
     const greetingEl = document.getElementById('greeting');
+    
     if (greetingEl) {
-        greetingEl.innerHTML = `${greet}, <span id="user-name" contenteditable="true">${name}</span>!`;
+        // Set struktur HTML sekali saja di awal
+        greetingEl.innerHTML = `<span id="greet-text">Good Morning</span>, <span id="user-name" contenteditable="true">${name}</span>!`;
         
-        // Listener simpan nama
+        // Listener simpan nama (cukup dipasang 1x saja)
         const userNameEl = document.getElementById('user-name');
         if (userNameEl) {
             userNameEl.addEventListener('blur', (e) => {
@@ -28,12 +27,27 @@ function updateGreeting() {
             });
         }
     }
+    updateGreetingTextOnly();
 }
 
-// Update jam setiap detik
-setInterval(updateTime, 1000);
+function updateGreetingTextOnly() {
+    const hrs = new Date().getHours();
+    let greet = "Selamat Pagi";
+    if (hrs >= 12 && hrs < 15) greet = "Selamat Siang";
+    else if (hrs >= 15 && hrs < 18) greet = "Selamat Sore";
+    else if (hrs >= 18 || hrs < 4) greet = "Selamat Malam";
+    
+    const greetTextEl = document.getElementById('greet-text');
+    // Hanya ubah teksnya saja, JANGAN overwrite innerHTML!
+    if (greetTextEl && greetTextEl.textContent !== greet) {
+        greetTextEl.textContent = greet;
+    }
+}
+
+// Jalankan saat pertama kali & set interval jam
+initGreeting();
 updateTime();
-updateGreeting();
+setInterval(updateTime, 1000);
 
 // Theme Toggle (Dark Mode)
 const themeBtn = document.getElementById('theme-toggle');
